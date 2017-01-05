@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-#==============================================================================
+# ============================================================================
 #  Jonas Kaufman jlkaufman@hmc.edu
 #  May 28, 2016
-#  Script to generate files for making SQSs
-#==============================================================================
+#  Script to generate files for making SQSs using screen
+#  Supports running multiple independent processes of mcsqs
+# ============================================================================
 import math
 import subprocess as sp
 import os
 
-#==============================================================================
+# ============================================================================
 # SFE Structure Building
-#==============================================================================
+# ============================================================================
 
 
 def makeLat(structure, a0, concLine, dest='.'):
@@ -81,12 +82,11 @@ def makeSQSCell(structure, a0, nx, ny, nz, dest='.'):
     f.close()
 
 
-#=========================================================================
+# ============================================================================
 #  Script Generation
-#=========================================================================
+# ============================================================================
 
-# change this to generate clusters internally
-# timeout option
+
 def genSQSScript(ranges, wr, wn, wd, temp, nTotal, nSQS, nice, dest):
     """Make script for running mcsqs"""
     corr = 'nice -n %d mcsqs -l=lat.in' % nice
@@ -127,9 +127,9 @@ def getConcLine(elements, comp):
             concLine += ['%s=%f' % (elements[i], comp[i] / concTotal)]
     return ','.join(concLine)
 
-#==============================================================================
+# ============================================================================
 #  Main Program
-#==============================================================================
+# ============================================================================
 # Get user input
 elements = raw_input('Elements (e.g. A, B, C): ').split(',')
 elements = sorted([e.strip() for e in elements])  # strip whitespace

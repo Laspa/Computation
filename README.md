@@ -1,1 +1,1 @@
-# Scripts for Laspa Computation Group
+# Scripts and Resources for Laspa Computation Group

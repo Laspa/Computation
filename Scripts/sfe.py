@@ -1,17 +1,18 @@
 #!/usr/bin/env python
-#===============================================================================
+# ========================================================================
 #  Jonas Kaufman jlkaufman@hmc.edu
 #  June 22, 2015
 #  Script to calculate generalized stacking fault energy
-#===============================================================================
+# ========================================================================
 
 from Cell import *
 import math
 import numpy as np
 import os
 import subprocess as sp
-EMAIL = 'jlkaufman@hmc.edu'  # Change this to your own!
+EMAIL = '...@hmc.edu'  # Change this to your own!
 ALLOCATION = 'TG-DMR140093'
+
 
 def makeSFECell(a0, element, nLayers=9, POSCAR='POSCAR'):
     """"""
@@ -20,20 +21,21 @@ def makeSFECell(a0, element, nLayers=9, POSCAR='POSCAR'):
     cell = Cell()
     cell.setHeader(element)
     cell.setA0(a0)
-    a = [na*math.sqrt(6)/4.0, -na*math.sqrt(2)/4.0, 0]
-    b = [nb*math.sqrt(6)/4.0, nb*math.sqrt(2)/4.0, 0]
-    c = [0, 0, nLayers*math.sqrt(3)/3.0]
+    a = [na * math.sqrt(6) / 4.0, -na * math.sqrt(2) / 4.0, 0]
+    b = [nb * math.sqrt(6) / 4.0, nb * math.sqrt(2) / 4.0, 0]
+    c = [0, 0, nLayers * math.sqrt(3) / 3.0]
     cell.setLatticeVectors([a, b, c])
     cell.elements = [element]
     cell.setCoordinateSystem('Direct')
     for k in range(nLayers):
-        z = float(k)/nLayers
+        z = float(k) / nLayers
         for j in range(nb):
-            y = ((k % 3)/3.0 + float(j))/nb
+            y = ((k % 3) / 3.0 + float(j)) / nb
             for i in range(na):
-                x = ((k % 3)/3.0 + float(i))/na
-                cell.addSite(0,Site([x, y, z]))
+                x = ((k % 3) / 3.0 + float(i)) / na
+                cell.addSite(0, Site([x, y, z]))
     cell.sendToPOSCAR(POSCAR)
+
 
 def makeShiftedPOSCAR(inFile, disp, layerChoice, destDir):
     """ """
@@ -44,18 +46,17 @@ def makeShiftedPOSCAR(inFile, disp, layerChoice, destDir):
     for i in range(cell.numberOfElements()):
         for j in range(cell.numberOfAtomsOfElement(i)):
             x, y, z = cell.sites[i][j].position
-            z += layerChoice/float(nc)
+            z += layerChoice / float(nc)
             if z > 1.0:
                 z += -1.0
             cell.sites[i][j].move([x, y, z])
 
-    inCutoff = (nc/2 - 0.5)
+    inCutoff = (nc / 2 - 0.5)
     exCutoff = inCutoff + 1.0
 
-
     a, b, c = cell.latticeVectors
-    adjdisp = disp/3.0  
-    c = np.array(c) + adjdisp*(np.array(a)/na + np.array(b)/nb)
+    adjdisp = disp / 3.0
+    c = np.array(c) + adjdisp * (np.array(a) / na + np.array(b) / nb)
     c = c.tolist()
     cell.setLatticeVectors([a, b, c])
 
@@ -67,22 +68,22 @@ def makeShiftedPOSCAR(inFile, disp, layerChoice, destDir):
             if z < 0.0:
                 z += 1.0
             # Correct for lattice vector
-            x += -adjdisp*z/na
-            y += -adjdisp*z/nb
+            x += -adjdisp * z / na
+            y += -adjdisp * z / nb
 
             # shift for SFE (ISF vs ESF, general case?)
-            # check z value     
-            if z > inCutoff/nc:
+            # check z value
+            if z > inCutoff / nc:
                 if disp > 1.0:
-                    if z > exCutoff/nc:
-                        x += adjdisp/na
-                        y += adjdisp/nb
+                    if z > exCutoff / nc:
+                        x += adjdisp / na
+                        y += adjdisp / nb
                     else:
-                        x += (1.0/3.0)/na
-                        y += (1.0/3.0)/nb
+                        x += (1.0 / 3.0) / na
+                        y += (1.0 / 3.0) / nb
                 else:
-                    x += adjdisp/na
-                    y += adjdisp/nb
+                    x += adjdisp / na
+                    y += adjdisp / nb
 
             cell.sites[i][j].move([x, y, z])
     #         cell.sites[i][j].setFree(False, False, False)
@@ -93,11 +94,11 @@ def makeShiftedPOSCAR(inFile, disp, layerChoice, destDir):
     #             else:
     #                 if z < (inCutoff + 1)/nc:
     #                     cell.sites[i][j].setFree(True, True, True)
-            
-    #         
+
+    #
 
     # cell.SelectiveDynamics = True
-    cell.setSiteMobilities(False,False,True) # allow only z relaxations
+    cell.setSiteMobilities(False, False, True)  # allow only z relaxations
     cell.sendToPOSCAR('%s/POSCAR' % destDir)
 
 
@@ -105,17 +106,17 @@ def getPeriodicities(POSCAR='POSCAR'):
     """Read periodicities of SFE cell"""
     cell = Cell().loadFromPOSCAR(POSCAR)
     a, b, c = cell.latticeVectors
-    na = np.linalg.norm(a) / (math.sqrt(2)/2.0)
-    nb = np.linalg.norm(b) / (math.sqrt(2)/2.0)
-    nc = np.linalg.norm(c) / (math.sqrt(3)/3.0)
+    na = np.linalg.norm(a) / (math.sqrt(2) / 2.0)
+    nb = np.linalg.norm(b) / (math.sqrt(2) / 2.0)
+    nc = np.linalg.norm(c) / (math.sqrt(3) / 3.0)
     na = int(round(na))
     nb = int(round(nb))
     nc = int(round(nc))
     return na, nb, nc
 
-#=========================================================================
+# ========================================================================
 # VASP Files
-#=========================================================================
+# ========================================================================
 
 
 def makeINCAR(system, static, dest, index, isif=2):
@@ -141,16 +142,14 @@ def makeINCAR(system, static, dest, index, isif=2):
     s += '\nNPAR = %d' % NPAR
     s += '\nALGO = %s' % ALGO
     s += '\nLWAVE = .FALSE.'
-    f = open('%s/INCAR%d'%(dest, index),'w+')
+    f = open('%s/INCAR%d' % (dest, index), 'w+')
     f.write(s)
     f.close()
 
 
-
-
-#===============================================================================
+# ========================================================================
 # KPOINTS Generation
-#===============================================================================
+# ========================================================================
 def makeKPOINTS(subdivisions, header='', dest='.', gamma=True):
     """ Make KPOINTS in dest file with specified subdivisions, center """
     print 'Making KPOINTS file...'
@@ -159,16 +158,17 @@ def makeKPOINTS(subdivisions, header='', dest='.', gamma=True):
     else:
         center = 'Monkhorst'
     header = str(header)
-    
-    s = 'Automatic mesh %s'%header          # header
-    s += '\n0'                              # 0 -> automatic generation scheme 
-    s += '\n%s'%center                      # grid center
-    s += '\n%d %d %d'%tuple(subdivisions)   # subdivisions along recip. vect.
-    s += '\n0 0 0'                          # optional shift 
-    
-    f = open('%s/KPOINTS'%dest,'w+')
+
+    s = 'Automatic mesh %s' % header          # header
+    s += '\n0'                              # 0 -> automatic generation scheme
+    s += '\n%s' % center                      # grid center
+    s += '\n%d %d %d' % tuple(subdivisions)   # subdivisions along recip. vect.
+    s += '\n0 0 0'                          # optional shift
+
+    f = open('%s/KPOINTS' % dest, 'w+')
     f.write(s)
     f.close()
+
 
 def autoSubdivisions(length, a0=0, POSCAR='POSCAR'):
     """ Calculate subdivisions automatically from POSCAR """
@@ -177,31 +177,31 @@ def autoSubdivisions(length, a0=0, POSCAR='POSCAR'):
     if a0 == 0:
         a0 = cell.a0
     nAtoms = sum(cell.elementCounts)
-    
-    # Calculate reciprocal lattice vectors
-    a1,a2,a3 = cell.latticeVectors
-    b1 = np.cross(a2,a3)/(np.dot(a1,np.cross(a2,a3)))/a0
-    b2 = np.cross(a3,a1)/(np.dot(a2,np.cross(a3,a1)))/a0
-    b3 = np.cross(a1,a2)/(np.dot(a3,np.cross(a1,a2)))/a0
 
-    bNorms = [np.linalg.norm(b) for b in [b1,b2,b3]]
+    # Calculate reciprocal lattice vectors
+    a1, a2, a3 = cell.latticeVectors
+    b1 = np.cross(a2, a3) / (np.dot(a1, np.cross(a2, a3))) / a0
+    b2 = np.cross(a3, a1) / (np.dot(a2, np.cross(a3, a1))) / a0
+    b3 = np.cross(a1, a2) / (np.dot(a3, np.cross(a1, a2))) / a0
+
+    bNorms = [np.linalg.norm(b) for b in [b1, b2, b3]]
 
     print bNorms
     # Calculate subdivision as per
     # http://cms.mpi.univie.ac.at/vasp/vasp/Automatic_k_mesh_generation.html
-    subdivisions = [1]*3
-    for i in [0,1,2]:
-        subdivisions[i] = int(max(1,((length*bNorms[i])+0.5)))
-    KPPRA = int(np.prod(subdivisions)*nAtoms) # k-points per recip. atom
-    
-    print 'Subdivisions are %d %d %d'%tuple(subdivisions)
-    print 'KPPRA = %d'%KPPRA
-    
+    subdivisions = [1] * 3
+    for i in [0, 1, 2]:
+        subdivisions[i] = int(max(1, ((length * bNorms[i]) + 0.5)))
+    KPPRA = int(np.prod(subdivisions) * nAtoms)  # k-points per recip. atom
+
+    print 'Subdivisions are %d %d %d' % tuple(subdivisions)
+    print 'KPPRA = %d' % KPPRA
+
     return subdivisions
 
-#=========================================================================
+# ========================================================================
 # File Preparation
-#=========================================================================
+# ========================================================================
 
 
 def genSubScript(name, nSteps, dest):
@@ -246,10 +246,9 @@ def genBatchScript(name, directories, scripts, dest='.'):
     f.close()
 
 
-
 def prepareDirectories(system, dList, allLayers):
     na, nb, nc = getPeriodicities()
-    if allLayers: 
+    if allLayers:
         choices = range(nc)
     else:
         choices = [0]
@@ -260,9 +259,10 @@ def prepareDirectories(system, dList, allLayers):
         directories = []
         scripts = []
         for disp in dList:
-            dDir = nDir + '/%.5f'%disp
+            dDir = nDir + '/%.5f' % disp
             header = '%s_%d_%.5f' % (system, chc, disp)
-            if not os.path.exists(dDir): os.makedirs(dDir)
+            if not os.path.exists(dDir):
+                os.makedirs(dDir)
             makeINCAR(header, False, dDir, 0)
             makeINCAR(header, True, dDir, 1)
             nSteps = 2
@@ -273,16 +273,16 @@ def prepareDirectories(system, dList, allLayers):
 
             # Make submission script
             genSubScript(header, nSteps, dDir)
-            directories += ['%.5f'%disp]
+            directories += ['%.5f' % disp]
             scripts += ['%s_submit' % header]
         # Create batch script in parent directory
         header = header = '%s_%d' % (system, chc)
         genBatchScript(header, directories, scripts, str(chc))
         sp.call(['chmod', '+x', '%d/%s_batch' % (chc, header)])
 
-#=========================================================================
+# ========================================================================
 #  Main Program
-#=========================================================================
+# ========================================================================
 print 'Add POSCAR and POTCAR files to the working directory\n'
 
 # VASP Settings
@@ -299,7 +299,7 @@ if make:
     else:
         make = False
 else:
-    make = False    
+    make = False
 
 print make
 
@@ -312,7 +312,7 @@ if make:
 klength = int(raw_input('Length for automatic k-mesh: '))
 if klength > 0:
     subdivisions = autoSubdivisions(klength)
-    makeKPOINTS(subdivisions,gamma=True)   
+    makeKPOINTS(subdivisions, gamma=True)
 
 cell = Cell().loadFromPOSCAR('POSCAR')
 nAtoms = sum(cell.elementCounts)
@@ -335,7 +335,7 @@ if allLayers:
     else:
         allLayers = False
 else:
-    allLayers = False   
+    allLayers = False
 
 valid = False
 while not valid:
@@ -359,16 +359,14 @@ else:
 print NPER, '\n'
 
 if NCORES == 64:
-	NPAR = 8
+    NPAR = 8
 else:
-	NPAR = 4
+    NPAR = 4
 
 RUNTIME = int(raw_input('Single job run time in minutes: '))
 print RUNTIME, '\n'
 
 
-
 # Prepare directories
 print 'Creating directories...\n'
 prepareDirectories(system, dList, allLayers)
-

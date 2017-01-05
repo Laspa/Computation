@@ -1,24 +1,25 @@
 #!/usr/bin/env python
-#=========================================================================
+# ============================================================================
 #  Jonas Kaufman jlkaufman@hmc.edu
 #  May 30, 2016
 #  Script to run set of fixed volume calculations for on Stampede
-#=========================================================================
+# ============================================================================
 """
 Add POSCAR, POTCAR and KPOINTS files to the working directory.
 Make sure to change the INCAR parameters to your liking.
+ENCUT, PREC, etc. are set in the Main Program section
 """
 from Cell import *
 import os
 import subprocess as sp
 import math
 import numpy as np
-EMAIL = 'jlkaufman@hmc.edu'  # Change this to your own!
+EMAIL = '...@hmc.edu'  # Change this to your own!
 ALLOCATION = 'TG-DMR140093'
 
-#=========================================================================
+# ============================================================================
 # POSCAR Building
-#=========================================================================
+# ============================================================================
 
 
 def makePOSCAR(header, a0, dest):
@@ -28,11 +29,13 @@ def makePOSCAR(header, a0, dest):
     cell.setA0(a0)
     cell.sendToPOSCAR('%s/POSCAR' % dest)
 
-#=========================================================================
+# ============================================================================
 # VASP Files
-#=========================================================================
+# ============================================================================
+
 
 def makeINCAR(system, static, dest, index, isif=2):
+    """ Make INCAR file """
     s = 'SYSTEM = %s' % system
     s += '\nPREC = %s' % PREC
     s += '\nENCUT = %d' % ENCUT
@@ -55,14 +58,14 @@ def makeINCAR(system, static, dest, index, isif=2):
     s += '\nNPAR = %d' % NPAR
     s += '\nALGO = %s' % ALGO
     s += '\nLWAVE = .FALSE.'
-    f = open('%s/INCAR%d'%(dest, index),'w+')
+    f = open('%s/INCAR%d' % (dest, index), 'w+')
     f.write(s)
     f.close()
 
 
-#===============================================================================
+# ============================================================================
 # KPOINTS Generation
-#===============================================================================
+# ============================================================================
 def makeKPOINTS(subdivisions, header='', dest='.', gamma=True):
     """ Make KPOINTS in dest file with specified subdivisions, center """
     print 'Making KPOINTS file...'
@@ -71,16 +74,17 @@ def makeKPOINTS(subdivisions, header='', dest='.', gamma=True):
     else:
         center = 'Monkhorst'
     header = str(header)
-    
-    s = 'Automatic mesh %s'%header          # header
-    s += '\n0'                              # 0 -> automatic generation scheme 
-    s += '\n%s'%center                      # grid center
-    s += '\n%d %d %d'%tuple(subdivisions)   # subdivisions along recip. vect.
-    s += '\n0 0 0'                          # optional shift 
-    
-    f = open('%s/KPOINTS'%dest,'w+')
+
+    s = 'Automatic mesh %s' % header          # header
+    s += '\n0'                              # 0 -> automatic generation scheme
+    s += '\n%s' % center                      # grid center
+    s += '\n%d %d %d' % tuple(subdivisions)   # subdivisions along recip. vect.
+    s += '\n0 0 0'                          # optional shift
+
+    f = open('%s/KPOINTS' % dest, 'w+')
     f.write(s)
     f.close()
+
 
 def autoSubdivisions(length, a0=0, POSCAR='POSCAR'):
     """ Calculate subdivisions automatically from POSCAR """
@@ -89,31 +93,31 @@ def autoSubdivisions(length, a0=0, POSCAR='POSCAR'):
     if a0 == 0:
         a0 = cell.a0
     nAtoms = sum(cell.elementCounts)
-    
-    # Calculate reciprocal lattice vectors
-    a1,a2,a3 = cell.latticeVectors
-    b1 = np.cross(a2,a3)/(np.dot(a1,np.cross(a2,a3)))/a0
-    b2 = np.cross(a3,a1)/(np.dot(a2,np.cross(a3,a1)))/a0
-    b3 = np.cross(a1,a2)/(np.dot(a3,np.cross(a1,a2)))/a0
 
-    bNorms = [np.linalg.norm(b) for b in [b1,b2,b3]]
+    # Calculate reciprocal lattice vectors
+    a1, a2, a3 = cell.latticeVectors
+    b1 = np.cross(a2, a3) / (np.dot(a1, np.cross(a2, a3))) / a0
+    b2 = np.cross(a3, a1) / (np.dot(a2, np.cross(a3, a1))) / a0
+    b3 = np.cross(a1, a2) / (np.dot(a3, np.cross(a1, a2))) / a0
+
+    bNorms = [np.linalg.norm(b) for b in [b1, b2, b3]]
 
     print bNorms
     # Calculate subdivision as per
     # http://cms.mpi.univie.ac.at/vasp/vasp/Automatic_k_mesh_generation.html
-    subdivisions = [1]*3
-    for i in [0,1,2]:
-        subdivisions[i] = int(max(1,((length*bNorms[i])+0.5)))
-    KPPRA = int(np.prod(subdivisions)*nAtoms) # k-points per recip. atom
-    
-    print 'Subdivisions are %d %d %d'%tuple(subdivisions)
-    print 'KPPRA = %d'%KPPRA
-    
+    subdivisions = [1] * 3
+    for i in [0, 1, 2]:
+        subdivisions[i] = int(max(1, ((length * bNorms[i]) + 0.5)))
+    KPPRA = int(np.prod(subdivisions) * nAtoms)  # k-points per recip. atom
+
+    print 'Subdivisions are %d %d %d' % tuple(subdivisions)
+    print 'KPPRA = %d' % KPPRA
+
     return subdivisions
 
-#=========================================================================
+# ============================================================================
 # File Preparation
-#=========================================================================
+# ============================================================================
 
 
 def genSubScript(name, nSteps, dest):
@@ -193,9 +197,9 @@ def prepareDirectories(system, aList, relax):
     genBatchScript(system, directories, scripts)
     sp.call(['chmod', '+x', '%s_batch' % system])
 
-#=========================================================================
+# ============================================================================
 #  Main Program
-#=========================================================================
+# ============================================================================
 print 'Add POSCAR, POTCAR and KPOINTS files to the working directory\n'
 
 # VASP Settings
@@ -228,7 +232,7 @@ print nVal, '\n'
 klength = int(raw_input('Length for automatic k-mesh: '))
 if klength > 0:
     subdivisions = autoSubdivisions(klength, a0=guess)
-    makeKPOINTS(subdivisions,gamma=True)   
+    makeKPOINTS(subdivisions, gamma=True)
 
 relax = raw_input('Relax ions? (y/n): ')
 if relax and relax[0].upper() == 'Y':
