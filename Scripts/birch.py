@@ -44,7 +44,6 @@ def makeINCAR(system, static, dest, index, isif=2):
     if static:
         s += '\nNSW = 0'
         s += '\nISMEAR = -5'
-        s += '\nLREAL = .FALSE.'
     else:
         s += '\nNSW = 50'
         s += '\nISIF = %d' % isif
@@ -56,8 +55,6 @@ def makeINCAR(system, static, dest, index, isif=2):
         s += '\nLCHARG = .FALSE.'
         s += '\nLREAL = %s' % LREAL
     s += '\nNPAR = %d' % NPAR
-    s += '\nALGO = %s' % ALGO
-    s += '\nLWAVE = .FALSE.'
     f = open('%s/INCAR%d' % (dest, index), 'w+')
     f.write(s)
     f.close()
@@ -153,17 +150,6 @@ print 'Add POSCAR, POTCAR and KPOINTS files to the working directory\n'
 ENCUT = 450
 PREC = 'Accurate'
 NPAR = 4
-cell = Cell().loadFromPOSCAR('POSCAR')
-nAtoms = sum(cell.elementCounts)
-print '%d atoms detected' % nAtoms
-if nAtoms >= 20:
-    LREAL = 'Auto'
-    ALGO = 'Fast'
-else:
-    LREAL = '.FALSE.'
-    ALGO = 'Normal'
-print 'Using LREAL = %s' % LREAL, '\n'
-print 'Using ALGO = %s' % ALGO, '\n'
 
 # Get user inputs
 system = raw_input('System name: ')
@@ -196,13 +182,14 @@ while not valid:
         print 'Number of cores must be a multiple of 16'
 print NCORES, '\n'
 
-NPER = raw_input('Number of nodes per 16 cores (1 or 2, default 1): ')
-if NPER and int(NPER) == 2:
-    NNODES = NCORES * int(NPER)
-else:
-    NPER = 1
-    NNODES = NCORES / 16
-print NPER, '\n'
+# NPER = raw_input('Number of nodes per 16 cores (1 or 2, default 1): ')
+# if NPER and int(NPER) == 2:
+#     NNODES = NCORES * int(NPER)
+# else:
+#     NPER = 1
+#     NNODES = NCORES / 16
+# print NPER, '\n'
+NPER = 1
 
 RUNTIME = int(raw_input('Single job run time in minutes: '))
 print RUNTIME, '\n'
