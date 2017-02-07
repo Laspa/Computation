@@ -29,6 +29,7 @@ def getZPositions(inFile='lat.in'):
     return zList
 
 
+# there is bug here that causes lat.in to not have gap
 def selectLayers(layers=[], inFile='lat.in', outFile='llat.in'):
     """
     Read ATAT structure and write structure containing only specified layers
@@ -202,8 +203,10 @@ def correlationsReport(layers, distances, struct='bestsqs.out', lat='lat.in'):
 def main():
     """Execute main functionality of the script."""
 
+    inFile = raw_input("sqs file name: ")
+
     # Read layers, report results
-    zList = getZPositions('bestsqs.out')
+    zList = getZPositions(inFile)
     print 'Found %d layers:' % len(zList)
     i = 0
     print 'L\tz'
@@ -222,7 +225,7 @@ def main():
     mismatches = []
     for layers in layersList:
         print 'Isolating layers ' + ' '.join(map(str, layers))
-        correlationsReport(layers, distances)
+        correlationsReport(layers, distances, inFile)
 
     # summary table
 
