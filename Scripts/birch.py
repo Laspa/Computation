@@ -69,7 +69,6 @@ def genSubScript(name, nSteps, dest):
     s += '\n#SBATCH -J %s' % name               # specify job name
     s += '\n#SBATCH -o %s_' % name + '%j'           # write output to this file
     s += '\n#SBATCH -n %d' % NCORES                 # request cores
-    s += '\n#SBATCH -N %d' % NNODES                 # request nodes
     s += '\n#SBATCH -p normal'                  # send to normal queue
     s += '\n#SBATCH -t %02d:%02d:00' % (hrs, mins)  # set maximum wall time
     s += '\n#SBATCH --mail-user=%s' % EMAIL     # set email
@@ -177,15 +176,6 @@ while not valid:
     else:
         print 'Number of cores must be a multiple of 16'
 print NCORES, '\n'
-
-# NPER = raw_input('Number of nodes per 16 cores (1 or 2, default 1): ')
-# if NPER and int(NPER) == 2:
-#     NNODES = NCORES * int(NPER)
-# else:
-#     NPER = 1
-#     NNODES = NCORES / 16
-# print NPER, '\n'
-NPER = 1
 
 RUNTIME = int(raw_input('Single job run time in minutes: '))
 print RUNTIME, '\n'
