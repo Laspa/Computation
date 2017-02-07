@@ -48,12 +48,8 @@ def makeINCAR(system, static, dest, index, isif=2):
         s += '\nNSW = 50'
         s += '\nISIF = %d' % isif
         s += '\nIBRION = 1'
-        s += '\nADDGRID = .TRUE.'
-        s += '\nEDIFFG = -0.02'
         s += '\nISMEAR = 1'
         s += '\nSIGMA = 0.2'
-        s += '\nLCHARG = .FALSE.'
-        s += '\nLREAL = %s' % LREAL
     s += '\nNPAR = %d' % NPAR
     f = open('%s/INCAR%d' % (dest, index), 'w+')
     f.write(s)
