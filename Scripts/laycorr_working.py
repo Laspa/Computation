@@ -1,16 +1,14 @@
-#!/usr/bin/env python
-# ============================================================================
-#  Jonas Kaufman jlkaufman@hmc.edu
-#  June 28, 2016
-#  Script to analyze correlations between layers in SFE SQSs.
-# ============================================================================
+# =============================================================================
+# Jonas Kaufman jlkaufman@hmc.edu
+# June 28, 2016
+# Script to analyze correlations between layers in SFE SQSs.
+# =============================================================================
 import subprocess as sp
 import os.path
 
-# ============================================================================
+# =============================================================================
 # ATAT Structure Manipulation
-# ============================================================================
-
+# =============================================================================
 
 def getZPositions(inFile='lat.in'):
     """Read ATAT structure and return a list of distinct z positions."""
@@ -28,11 +26,9 @@ def getZPositions(inFile='lat.in'):
     zList.sort()
     return zList
 
-
-# there is bug here that causes lat.in to not have gap
 def selectLayers(layers=[], inFile='lat.in', outFile='llat.in'):
     """
-    Read ATAT structure and write structure containing only specified layers
+    Read ATAT structure and write structure containing only specified layers 
     """
     CRIT = 0.000001                     # Criterion for equalitiy
     zList = getZPositions(inFile)       # Read z positions
@@ -55,11 +51,7 @@ def selectLayers(layers=[], inFile='lat.in', outFile='llat.in'):
     f.write(outString)
     f.close()
 
-
-def randomStructure(
-        inFile='lbestsqs.out',
-        latFile='llat.in',
-        outFile='lrnd.out'):
+def randomStructure(inFile='lbestsqs.out', latFile='llat.in', outFile='lrnd.out' ):
     """ """
     f = open(latFile)                    # Read lat file
     lines = f.readlines()
@@ -78,13 +70,13 @@ def randomStructure(
     nTotal = len(lines) - 6             # Get number of atoms
     atoms = []                          # Make list of atoms
     for i in range(len(elements)):
-        n = int(round(concs[i] * float(nTotal)))
-        atoms += [elements[i]] * n
-    outString = ''
-    for L in lines[:6]:
-        outString += L
-    for i in range(nTotal):             # Add sites with new composition
-        L = lines[i + 6]
+        n = int(round(concs[i]*float(nTotal)))
+        atoms += [elements[i]]*n
+    outString = ''       
+    for L in lines[:6]:                 
+        outString += L                 
+    for i in range(nTotal):             # Add sites with new composition     
+        L = lines[i+6]
         a = atoms[i]
         L = L.split()
         L = ' '.join(L[:3] + [a]) + '\n'
@@ -93,10 +85,9 @@ def randomStructure(
     f.write(outString)
     f.close
 
-# ============================================================================
+# =============================================================================
 # ATAT Commands
-# ============================================================================
-
+# =============================================================================
 
 def getCorr(distances, struct='bestsqs.out', lat='lat.in', rnd=False):
     """Run corrdump on structure and return correlations"""
@@ -105,15 +96,15 @@ def getCorr(distances, struct='bestsqs.out', lat='lat.in', rnd=False):
     else:
         outFile = 'strcorr.out'
     command = 'corrdump -ro -crf=greg'
-    command += ' -s=%s -l=%s' % (struct, lat)
+    command += ' -s=%s -l=%s'%(struct, lat)
     i = 2
     for dist in distances:
         if dist != 0:
-            command += ' -%d=%f' % (i, dist)
+            command += ' -%d=%f'%(i, dist)
         i += 1
     if rnd:
         command += ' -rnd'
-    command += ' > %s' % outFile
+    command += ' > %s'%outFile
     print command
     sp.call(command, shell=True)
     f = open(outFile, 'r')
@@ -122,11 +113,10 @@ def getCorr(distances, struct='bestsqs.out', lat='lat.in', rnd=False):
     correlations = map(float, correlations)
     return correlations
 
-
 def getClus():
     """Run getclus and return cluster nubmers, lengths, and multiplicities."""
     outFile = 'getclus.out'
-    command = 'getclus > %s' % outFile
+    command = 'getclus > %s'%outFile
     print command
     sp.call(command, shell=True)
     numbers = []
@@ -139,13 +129,12 @@ def getClus():
         clus = clus.split()
         numbers += [int(clus[0])]
         lengths += [float(clus[1])]
-        multips += [int(clus[2])]
+        multips += [int(clus[2])] 
     return (numbers, lengths, multips)
 
-# ============================================================================
+# =============================================================================
 # ATAT Correlation Analysis
-# ============================================================================
-
+# =============================================================================
 
 def correlationsReport(layers, distances, struct='bestsqs.out', lat='lat.in'):
     """Analyze correlations of specified layers and print a report."""
@@ -193,33 +182,33 @@ def correlationsReport(layers, distances, struct='bestsqs.out', lat='lat.in'):
     f.write(outString)
     f.close()
     # return absSum
+   
 
-
-# ============================================================================
+# =============================================================================
 # Main Program
-# ============================================================================
+# =============================================================================
 
 def main():
     """Execute main functionality of the script."""
 
     inFile = raw_input("sqs file name: ")
 
-    # Read layers, report results
+    #Read layers, report results
     zList = getZPositions(inFile)
-    print 'Found %d layers:' % len(zList)
+    print 'Found %d layers:'%len(zList)
     i = 0
     print 'L\tz'
     for z in zList:
-        print '%d\t%.6f' % (i, z)
+        print '%d\t%.6f'%(i, z)
         i += 1
     print
 
     distances = [4, 0, 0]
 
-    layersList = []
+    layersList = [[8,0]]
 
-    for n in range(9):
-        layersList += [[n, n + 1]]
+    for n in range(8):
+        layersList += [[n,n+1]]  
 
     mismatches = []
     for layers in layersList:
@@ -229,4 +218,4 @@ def main():
     # summary table
 
 if __name__ == '__main__':
-    main()
+    main()   
