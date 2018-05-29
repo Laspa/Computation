@@ -11,7 +11,7 @@ by the reciprocal lattice vectors to produce subdivisions
 """
 import subprocess as sp
 import numpy as np
-from Cell import *
+from Cell2 import *
 EMAIL = 'jullin@g.hmc.edu'  # Change this to your own!
 ALLOCATION = 'TG-DMR140093'
 

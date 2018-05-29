@@ -4,7 +4,7 @@
 #  June 1, 2016
 #  Script to make simple POTCAR files
 # ============================================================================
-from Cell import *
+from Cell2 import *
 import math
 
 # ============================================================================
@@ -54,10 +54,9 @@ def makeBCCPOSCAR(header, compoundL, a0, style=5, dest='.', name='POSCAR'):
     cell.setA0(a0)  # overall scaling
     cell.setCoordinateSystem('Direct')  # change to direct
     cell.setLatticeVectors([a, b, c])
-    num = 0
-    for p in [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]:
-        cell.addSite(num, Site(p))  # add sites
-        ++num
+    pos = [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]
+    for i in range(0, len(pos)):
+        cell.addSite(i, Site(pos[i]))  # add sites
     cell.sendToPOSCAR('%s/%s' % (dest, name), style=style)
 
 

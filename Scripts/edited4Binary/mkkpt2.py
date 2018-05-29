@@ -6,7 +6,7 @@
 # ============================================================================
 import subprocess as sp
 import numpy as np
-from Cell import *
+from Cell2 import *
 
 # ============================================================================
 # KPOINTS Generation
