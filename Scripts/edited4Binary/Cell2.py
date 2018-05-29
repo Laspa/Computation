@@ -3,7 +3,7 @@
 # July 25, 2014
 # edited by Jonas Kaufman jlkaufman@hmc.edu
 # July 23, 2015
-# Classes and methods for manipulating POSCARs and the cells they describe. :)
+# Classes and methods for manipulating POSCARs and the cells they describe. :(
 # ============================================================================
 import numpy as np
 
