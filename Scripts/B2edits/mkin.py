@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ==============================
-#  Emily Hwang
+#  Emily Hwang eyhwang@hmc.edu
 #  May 28, 2018
 #  Script to make a simple INCAR
 # ==============================
