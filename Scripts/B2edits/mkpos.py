@@ -2,7 +2,8 @@
 #===============================================================================
 #  Jonas Kaufman jlkaufman@hmc.edu 
 #  June 1, 2016
-#  Script to make simple POTCAR files
+#  Script to make simple POSCAR files
+#  Edited by Emily Hwang eyhwang@hmc.edu
 # ============================================================================
 from Cell import *
 import math
