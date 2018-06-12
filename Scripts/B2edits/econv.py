@@ -3,6 +3,7 @@
 #  Jonas Kaufman jlkaufman@hmc.edu 
 #  June 3, 2016    
 #  Script to run energy cutoff convergence calculations on Stampede
+#  Edited by Emily Hwang eyhwang@hmc.edu
 #===============================================================================
 """ Add POSCAR, POTCAR, KPOINTS and INCAR files to the working directory. """
 import subprocess as sp
@@ -138,13 +139,8 @@ print NCORES, '\n'
 NNODES = int(raw_input('Number of nodes? (default 1): '))
 if NCORES / 64 > NNODES:
     NCORES = NNODES * 64
-#NPER = raw_input('Number of nodes per 16 cores (1 or 2, default 1): ')
-#if NPER and int(NPER) == 2:
-#	NNODES = NCORES*int(NPER)
-#else:
-#	NPER = 1
-#	NNODES = NCORES/16
 print NNODES, '\n'
+print "The number of cores per node is: "+  str(NCORES/NNODES), '\n'
 
 RUNTIME = int(raw_input('Single job run time in minutes: '))
 print RUNTIME, '\n'
