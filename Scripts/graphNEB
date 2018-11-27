@@ -45,11 +45,11 @@ whichDir='../'
 
 cont() {
         while [[ $i -ge 0 ]];do
-                echo 'Now i is '$i
+                echo "Now working in continued directory "$i
                 f=$(($numCont-$i+1))
                 prePath=$(printf "%${f}s")
                 while [[ $j -gt 0 ]];do
-                        echo 'j is '$j
+                         echo 'Done Image '$j
                         Dir="graphs/$j$fileName"
                         cd $dirName$j
                         cat fe.dat >> ${prePath// /$whichDir}$Dir
@@ -67,3 +67,4 @@ cont() {
 
 cont
 
+echo 'done!'
