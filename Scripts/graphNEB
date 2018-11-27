@@ -1,0 +1,69 @@
+#!/bin/bash
+
+#============================================================================
+#  Simone Griffith sgriffith@hmc.edu
+#  November 26, 2018
+#  Script to compile all data from continued NEB into a .txt for each image
+#============================================================================
+
+#============================================================================
+#User Input
+#============================================================================
+
+
+echo "How many continued folders are there?"
+read numCont
+
+echo "How many images are there?"
+read numImages
+
+#============================================================================
+#Directory Setup
+#============================================================================
+
+mkdir graphs
+cd graphs
+
+j=$numImages
+dirName='0'
+fileName='fe.txt'
+
+while [[ $j -gt 0 ]];do
+        touch $j$fileName
+        j=$[$j - 1]
+done
+
+cd ..
+
+#============================================================================
+#Main Function
+#============================================================================
+
+j=$numImages
+i=$numCont
+whichDir='../'
+
+cont() {
+        while [[ $i -ge 0 ]];do
+                echo 'Now i is '$i
+                f=$(($numCont-$i+1))
+                prePath=$(printf "%${f}s")
+                while [[ $j -gt 0 ]];do
+                        echo 'j is '$j
+                        Dir="graphs/$j$fileName"
+                        cd $dirName$j
+                        cat fe.dat >> ${prePath// /$whichDir}$Dir
+                        cd ..
+                        j=$[$j - 1]
+                done
+                if [[ $i -gt 0 ]];then
+                        cd "continued"
+                        j=$numImages
+                fi
+                i=$[ $i - 1 ]
+                cont
+        done
+}
+
+cont
+
